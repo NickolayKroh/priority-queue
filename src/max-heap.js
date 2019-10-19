@@ -2,8 +2,7 @@ const Node = require('./node');
 
 class MaxHeap {
 	constructor() {
-		this.root = null;
-		this.parentNodes = [];
+		this.clear();
 	}
 
 	push(data, priority) {
@@ -15,33 +14,53 @@ class MaxHeap {
 
 	pop() {
 		if(this.root !== null) {
-			let root = this.root;
 
-			this.detachRoot();
-
-			return root.data;
+			return this.detachRoot().data;
 		}
 	}
 
 	detachRoot() {
-		
+		let root = this.root;
+
+		if(this.length === 1) {
+			this.clear();
+		}	
+		else if(this.length > 1) {
+			this.shiftNodeDown(root);
+
+			root.parent.left = root.parent.right;
+			root.parent.right = null;
+
+			let rootIndex = this.parentNodes.indexOf(root);
+			if(rootIndex === this.parentNodes.length - 1)
+				this.parentNodes.pop();
+			else {
+				this.parentNodes.splice(-2, 1);
+				this.parentNodes.unshift(root.parent);
+			}
+
+			--this.length;
+		}
+
+		return root;
 	}
 
 	restoreRootFromLastInsertedNode(detached) {
-		
+		this.insertNode(detached);
 	}
 
 	size() {
-		
+		return this.length;
 	}
 
 	isEmpty() {
-		
+		return this.root === null;
 	}
 
 	clear() {
 		this.root = null;
 		this.parentNodes = [];
+		this.length = 0;
 	}
 
 	insertNode(node) {
@@ -55,6 +74,7 @@ class MaxHeap {
 		}
 	
 		this.parentNodes.push(node);
+		++this.length;
 	}
 
 	shiftNodeUp(node) {
@@ -77,8 +97,50 @@ class MaxHeap {
 	}
 
 	shiftNodeDown(node) {
+		if(node.left === null) {
+			let current = node;
+
+			while(current.parent !== null)
+				current = current.parent;
+			
+			this.root = current;
+
+			return;
+		}
+
+		let next;
+		if(node.right !== null && node.right.left !== null)
+			next = node.right;
+		else
+			next = node.left;
 		
+		let nextIndex = this.parentNodes.indexOf(next);
+		if(nextIndex >= 0) {
+			let nodeIndex = this.parentNodes.indexOf(node);
+			if(nodeIndex >= 0)
+				this.parentNodes[nodeIndex] = next;
+			
+			this.parentNodes[nextIndex] = node;
+		}
+		
+		next.swapWithParent();
+		
+		this.shiftNodeDown(node);
 	}
 }
 
 module.exports = MaxHeap;
+
+
+// h = new MaxHeap();
+
+// h.root = new Node(0, 3);
+// h.root.appendChild(new Node(1, 20));
+// h.root.appendChild(new Node(2, 7));
+// h.root.left.appendChild(new Node(3, 5));
+
+
+// const newRoot = h.root.left;
+// const newDeepest = h.root;
+
+// h.shiftNodeDown(h.root);
