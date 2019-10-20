@@ -27,7 +27,7 @@ class Node {
 			this.left.parent = null
 			this.right = null;
 		}
-		else throw new new SyntaxError("Node has no child");;
+		else throw new new SyntaxError("Not a child");;
 	}
 
 	remove() {
